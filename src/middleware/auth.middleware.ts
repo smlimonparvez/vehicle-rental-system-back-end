@@ -11,11 +11,11 @@ export const authenticate = (
     try {
         const authHeader = req.headers.authorization;
 
-        if(!authHeader || authHeader.startWith('Bearer')) {
+        if(!authHeader || !authHeader.startsWith('Bearer ')) {
             return sendError(res, 401, 'Authentication token required');
         }
 
-        const token = authHeader.subString(7);
+        const token = authHeader.substring(7);
         const decoded = verifyToken(token);
         
         req.user = decoded;

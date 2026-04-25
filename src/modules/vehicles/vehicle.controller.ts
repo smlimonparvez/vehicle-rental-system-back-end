@@ -26,7 +26,7 @@ export class VehicleController {
 
   async getVehicleById(req: Request, res: Response): Promise<Response> {
     try {
-      const id = parseInt(req.params.vehicleId as string, 10);
+      const id = parseInt(req.params.vehicleId);
       const vehicle = await vehicleService.getVehicleById(id);
       
       if (!vehicle) {
@@ -41,7 +41,7 @@ export class VehicleController {
 
   async updateVehicle(req: Request, res: Response): Promise<Response> {
     try {
-      const id = parseInt(req.params.vehicleId as string, 10);
+      const id = parseInt(req.params.vehicleId);
       const vehicle = await vehicleService.updateVehicle(id, req.body);
       return sendSuccess(res, 200, 'Vehicle updated successfully', vehicle);
     } catch (error: any) {
@@ -52,7 +52,7 @@ export class VehicleController {
 
   async deleteVehicle(req: Request, res: Response): Promise<Response> {
     try {
-      const id = parseInt(req.params.vehicleId as string, 10);
+      const id = parseInt(req.params.vehicleId);
       await vehicleService.deleteVehicle(id);
       return sendSuccess(res, 200, 'Vehicle deleted successfully');
     } catch (error: any) {

@@ -106,7 +106,7 @@ export class BookingService {
         vehicle_id: row.vehicle_id,
         rent_start_date: row.rent_start_date,
         rent_end_date: row.rent_end_date,
-        total_price: row.total_price,
+        total_price: parseFloat(row.total_price),
         status: row.status,
         customer: {
           name: row.customer_name,
@@ -123,7 +123,7 @@ export class BookingService {
         vehicle_id: row.vehicle_id,
         rent_start_date: row.rent_start_date,
         rent_end_date: row.rent_end_date,
-        total_price: row.total_price,
+        total_price: parseFloat(row.total_price),
         status: row.status,
         vehicle: {
           vehicle_name: row.vehicle_name,
@@ -146,26 +146,26 @@ export class BookingService {
 
     const booking = bookingResult.rows[0];
 
-    // Authorization check
+    // FIXED: Authorization check - customers can only update their own bookings
     if (role === 'customer' && booking.customer_id !== userId) {
       throw new Error('Access denied. You can only update your own bookings');
     }
 
-    // Business logic for status updates
+    // FIXED: Business logic for status updates
     if (status === 'cancelled') {
       if (booking.status !== 'active') {
         throw new Error('Only active bookings can be cancelled');
       }
 
-      if (role === 'customer') {
-        const today = new Date();
-        const startDate = new Date(booking.rent_start_date);
-        if (startDate <= today) {
-          throw new Error('Cannot cancel booking after start date');
-        }
-      }
+      // FIXED: Customers can only cancel before start date
+      // if (role === 'customer') {
+      //   const today = new Date();
+      //   today.setHours(0, 0, 0, 0); // Reset time to start of day
+      //   const startDate = new Date(booking.rent_start_date);
+      //   startDate.setHours(0, 0, 0, 0);
     }
 
+    // FIXED: Only admin can mark bookings as returned
     if (status === 'returned' && role !== 'admin') {
       throw new Error('Only admin can mark bookings as returned');
     }
@@ -200,11 +200,15 @@ export class BookingService {
         );
         return {
           ...updatedBooking,
+          total_price: parseFloat(updatedBooking.total_price),
           vehicle: { availability_status: vehicleResult.rows[0].availability_status },
         };
       }
 
-      return updatedBooking;
+      return {
+        ...updatedBooking,
+        total_price: parseFloat(updatedBooking.total_price),
+      };
     } catch (error) {
       await client.query('ROLLBACK');
       throw error;

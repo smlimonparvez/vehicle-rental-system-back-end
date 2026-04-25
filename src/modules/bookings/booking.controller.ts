@@ -1,21 +1,21 @@
 import { Response } from 'express';
+import { BookingService } from './booking.service';
+import { sendSuccess, sendError } from '../../utils/response.utils';
 import { AuthRequest } from '../../types';
-import {BookingService} from './booking.service';
-import { sendError, sendSuccess } from '../../utils/response.utils';
 
 const bookingService = new BookingService();
 
 export class BookingController {
-    async createBooking(req: AuthRequest, res: Response): Promise<Response> {
-        try {
-            const booking = await bookingService.createBooking(req.body);
-            return sendSuccess(res, 201, 'Booking created successfully', booking);
-     } catch (error: any) {
+  async createBooking(req: AuthRequest, res: Response): Promise<Response> {
+    try {
+      const booking = await bookingService.createBooking(req.body);
+      return sendSuccess(res, 201, 'Booking created successfully', booking);
+    } catch (error: any) {
       return sendError(res, 400, error.message);
-     }    
     }
+  }
 
-    async getAllBookings(req: AuthRequest, res: Response): Promise<Response> {
+  async getAllBookings(req: AuthRequest, res: Response): Promise<Response> {
     try {
       const user = req.user!;
       const bookings = await bookingService.getAllBookings(user.id, user.role);
@@ -32,12 +32,21 @@ export class BookingController {
 
   async updateBooking(req: AuthRequest, res: Response): Promise<Response> {
     try {
-      const bookingId = parseInt(req.params.bookingId as string, 10);
+      const bookingId = parseInt(req.params.bookingId);
       const { status } = req.body;
       const user = req.user!;
 
       if (!status) {
         return sendError(res, 400, 'Status is required');
+      }
+
+      // FIXED: Validate status based on role
+      if (user.role === 'customer' && status !== 'cancelled') {
+        return sendError(res, 403, 'Customers can only cancel bookings');
+      }
+
+      if (user.role === 'admin' && status === 'cancelled') {
+        return sendError(res, 403, 'Admin cannot cancel bookings. Only customers can cancel their own bookings');
       }
 
       const booking = await bookingService.updateBooking(bookingId, status, user.id, user.role);

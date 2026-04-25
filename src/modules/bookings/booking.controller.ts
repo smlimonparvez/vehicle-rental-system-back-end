@@ -32,7 +32,7 @@ export class BookingController {
 
   async updateBooking(req: AuthRequest, res: Response): Promise<Response> {
     try {
-      const bookingId = parseInt(req.params.bookingId);
+      const bookingId = parseInt(req.params.bookingId as string, 10);
       const { status } = req.body;
       const user = req.user!;
 

@@ -17,7 +17,7 @@ export class UserController {
 
   async updateUser(req: AuthRequest, res: Response): Promise<Response> {
     try {
-      const userId = parseInt(req.params.userId);
+      const userId = parseInt(req.params.userId as string, 10);
       const currentUser = req.user!;
 
       // FIXED: Check authorization - admin can update anyone, customer can only update self
@@ -40,7 +40,7 @@ export class UserController {
 
   async deleteUser(req: AuthRequest, res: Response): Promise<Response> {
     try {
-      const userId = parseInt(req.params.userId);
+      const userId = parseInt(req.params.userId as string, 10);
       await userService.deleteUser(userId);
       return sendSuccess(res, 200, 'User deleted successfully');
     } catch (error: any) {

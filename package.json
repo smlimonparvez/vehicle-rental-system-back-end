@@ -10,7 +10,7 @@
     "db:setup": "node -r dotenv/config src/config/database.ts"
   },
   "engines": {
-    "node": "18.x"
+    "node": "24.x"
   },
   "keywords": [],
   "author": "",
